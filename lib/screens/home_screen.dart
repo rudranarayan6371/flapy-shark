@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flappy_flame/screens/game_screen.dart';
 import 'package:flappy_flame/services/score_service.dart';
+import 'package:flappy_flame/workshop/game_settings.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -29,11 +30,14 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Color(0xFF87CEEB), Color(0xFF4A90E2)],
+            colors: [
+              WorkshopSettings.skyColorTop,
+              WorkshopSettings.skyColorBottom,
+            ],
           ),
         ),
         child: SafeArea(
@@ -58,14 +62,14 @@ class _HomePageState extends State<HomePage> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'BIRD',
+                  'SHARK',
                   style: GoogleFonts.pressStart2p(
                     fontSize: 56,
                     fontWeight: FontWeight.bold,
-                    color: const Color(0xFFFFD700),
+                    color: const Color(0xFF80DEEA),
                     shadows: [
                       const Shadow(
-                        color: Color(0xFF2C3E50),
+                        color: Color(0xFF001F3F),
                         offset: Offset(4, 4),
                         blurRadius: 0,
                       ),

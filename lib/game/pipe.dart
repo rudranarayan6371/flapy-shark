@@ -125,6 +125,10 @@ class Pipe extends PositionComponent with CollisionCallbacks {
         case 'metal':
           _drawMetalPipe(canvas);
           break;
+        case 'ancient_brick':
+        case 'brick':
+          _drawAncientBrickPipe(canvas);
+          break;
         case 'classic':
         default:
           _drawClassicPipe(canvas);
@@ -396,5 +400,109 @@ class Pipe extends PositionComponent with CollisionCallbacks {
     final boltPaint = Paint()..color = Colors.grey[900]!;
     canvas.drawCircle(Offset(5, capY + capHeight / 2), 5, boltPaint);
     canvas.drawCircle(Offset(pipeWidth - 5, capY + capHeight / 2), 5, boltPaint);
+  }
+
+  void _drawAncientBrickPipe(Canvas canvas) {
+    // 1. Mortar background base
+    final mortarPaint = Paint()..color = WorkshopSettings.pipeBorderColor;
+    canvas.drawRect(Rect.fromLTWH(0, 0, pipeWidth, pipeHeight), mortarPaint);
+
+    // 2. Staggered ancient brick courses
+    const double brickHeight = 20.0;
+    const double brickWidth = 32.0;
+    const double mortarGap = 2.0;
+
+    final baseBrickPaint = Paint()..color = WorkshopSettings.pipeColor;
+    final highlightPaint = Paint()
+      ..color = WorkshopSettings.pipeHighlightColor
+      ..strokeWidth = 1.2
+      ..style = PaintingStyle.stroke;
+    final shadowPaint = Paint()
+      ..color = WorkshopSettings.pipeShadowColor
+      ..strokeWidth = 1.2
+      ..style = PaintingStyle.stroke;
+    final mossPaint = Paint()..color = const Color(0xFF385E42).withValues(alpha: 0.65);
+
+    int row = 0;
+    for (double y = 0; y < pipeHeight; y += brickHeight) {
+      final double xOffset = (row % 2 == 0) ? 0.0 : -(brickWidth / 2.0);
+      for (double x = xOffset; x < pipeWidth; x += brickWidth) {
+        final double left = x.clamp(0.0, pipeWidth);
+        final double right = (x + brickWidth - mortarGap).clamp(0.0, pipeWidth);
+        final double width = right - left;
+        final double height = (pipeHeight - y < brickHeight) ? (pipeHeight - y) : (brickHeight - mortarGap);
+
+        if (width > 2 && height > 2) {
+          final brickRect = Rect.fromLTWH(left, y, width, height);
+          canvas.drawRect(brickRect, baseBrickPaint);
+
+          // Top and left edge highlight (aged chiseled look)
+          canvas.drawLine(Offset(left, y), Offset(right, y), highlightPaint);
+          canvas.drawLine(Offset(left, y), Offset(left, y + height), highlightPaint);
+
+          // Bottom and right edge shadow
+          canvas.drawLine(Offset(left, y + height), Offset(right, y + height), shadowPaint);
+          canvas.drawLine(Offset(right, y), Offset(right, y + height), shadowPaint);
+
+          // Subtle ancient weathered moss on occasional bricks
+          if ((row * 7 + x.toInt()) % 5 == 0 && width > 10) {
+            canvas.drawCircle(Offset(left + width * 0.4, y + height * 0.5), 2.5, mossPaint);
+          }
+        }
+      }
+      row++;
+    }
+
+    // 3. Ancient Stone Cap
+    _drawAncientBrickCap(canvas);
+  }
+
+  void _drawAncientBrickCap(Canvas canvas) {
+    const double capHeight = 32.0;
+    const double capExtend = 8.0;
+    final double capY = isTop ? pipeHeight - capHeight : 0;
+    final capRect = Rect.fromLTWH(-capExtend, capY, pipeWidth + capExtend * 2, capHeight);
+
+    // Stone base
+    final capPaint = Paint()..color = WorkshopSettings.pipeColor;
+    canvas.drawRect(capRect, capPaint);
+
+    // Weathered stone border
+    final borderPaint = Paint()
+      ..color = WorkshopSettings.pipeBorderColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3;
+    canvas.drawRect(capRect, borderPaint);
+
+    // Chiseled highlights and shadows
+    final highlightPaint = Paint()
+      ..color = WorkshopSettings.pipeHighlightColor
+      ..strokeWidth = 2;
+    final shadowPaint = Paint()
+      ..color = WorkshopSettings.pipeShadowColor
+      ..strokeWidth = 2;
+
+    if (isTop) {
+      canvas.drawLine(Offset(-capExtend + 3, capY + 3), Offset(pipeWidth + capExtend - 3, capY + 3), highlightPaint);
+      canvas.drawLine(Offset(-capExtend + 3, capY + capHeight - 3), Offset(pipeWidth + capExtend - 3, capY + capHeight - 3), shadowPaint);
+    } else {
+      canvas.drawLine(Offset(-capExtend + 3, capY + capHeight - 3), Offset(pipeWidth + capExtend - 3, capY + capHeight - 3), highlightPaint);
+      canvas.drawLine(Offset(-capExtend + 3, capY + 3), Offset(pipeWidth + capExtend - 3, capY + 3), shadowPaint);
+    }
+
+    // Weathered stone carving line
+    final carvePaint = Paint()
+      ..color = WorkshopSettings.pipeBorderColor
+      ..strokeWidth = 1.5;
+    canvas.drawLine(
+      Offset(-capExtend + 4, capY + capHeight / 2),
+      Offset(pipeWidth + capExtend - 4, capY + capHeight / 2),
+      carvePaint,
+    );
+
+    // Moss accent on ancient stone cap
+    final mossPaint = Paint()..color = const Color(0xFF385E42).withValues(alpha: 0.7);
+    canvas.drawCircle(Offset(pipeWidth / 2 - 15, capY + capHeight / 2), 3, mossPaint);
+    canvas.drawCircle(Offset(pipeWidth / 2 + 15, capY + capHeight / 2), 2.5, mossPaint);
   }
 }

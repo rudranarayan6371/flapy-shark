@@ -131,6 +131,9 @@ class Bird extends PositionComponent with HasGameReference<FlappyGame>, Collisio
         case 'emoji':
           _drawEmojiBird(canvas);
           break;
+        case 'shark':
+          _drawShark(canvas);
+          break;
         case 'detailed':
         default:
           _drawDetailedBird(canvas);
@@ -341,6 +344,119 @@ class Bird extends PositionComponent with HasGameReference<FlappyGame>, Collisio
       ..lineTo(size.x / 2 + birdSize / 2 - 5, size.y / 2 + 5)
       ..close();
     canvas.drawPath(beakPath, beakPaint);
+  }
+
+  /// 🦈 Shark Bird
+  void _drawShark(Canvas canvas) {
+    final centerX = size.x / 2;
+    final centerY = size.y / 2;
+    final bodyPaint = Paint()..color = WorkshopSettings.birdColor;
+    final bellyPaint = Paint()..color = WorkshopSettings.birdBellyColor;
+    final finPaint = Paint()..color = WorkshopSettings.birdWingColor;
+
+    // 1. Caudal (Tail) Fin
+    final tailPath = Path()
+      ..moveTo(centerX - birdSize * 0.35, centerY)
+      ..lineTo(centerX - birdSize * 0.65, centerY - birdSize * 0.45)
+      ..quadraticBezierTo(centerX - birdSize * 0.45, centerY - birdSize * 0.1, centerX - birdSize * 0.35, centerY)
+      ..lineTo(centerX - birdSize * 0.58, centerY + birdSize * 0.3)
+      ..quadraticBezierTo(centerX - birdSize * 0.45, centerY + birdSize * 0.1, centerX - birdSize * 0.35, centerY)
+      ..close();
+    canvas.drawPath(tailPath, finPaint);
+
+    // 2. Dorsal Fin on top
+    final dorsalPath = Path()
+      ..moveTo(centerX - birdSize * 0.1, centerY - birdSize * 0.25)
+      ..quadraticBezierTo(centerX, centerY - birdSize * 0.6, centerX + birdSize * 0.05, centerY - birdSize * 0.62)
+      ..quadraticBezierTo(centerX + birdSize * 0.02, centerY - birdSize * 0.45, centerX + birdSize * 0.18, centerY - birdSize * 0.22)
+      ..close();
+    canvas.drawPath(dorsalPath, finPaint);
+
+    // 3. Torpedo Shark Body
+    final bodyPath = Path()
+      ..moveTo(centerX - birdSize * 0.4, centerY)
+      ..cubicTo(
+        centerX - birdSize * 0.3, centerY - birdSize * 0.4,
+        centerX + birdSize * 0.2, centerY - birdSize * 0.4,
+        centerX + birdSize * 0.55, centerY - birdSize * 0.05,
+      )
+      ..cubicTo(
+        centerX + birdSize * 0.3, centerY + birdSize * 0.4,
+        centerX - birdSize * 0.2, centerY + birdSize * 0.35,
+        centerX - birdSize * 0.4, centerY,
+      )
+      ..close();
+    canvas.drawPath(bodyPath, bodyPaint);
+
+    // 4. Pale Counter-Shaded Underbelly
+    final bellyPath = Path()
+      ..moveTo(centerX - birdSize * 0.35, centerY + birdSize * 0.05)
+      ..cubicTo(
+        centerX - birdSize * 0.1, centerY + birdSize * 0.08,
+        centerX + birdSize * 0.2, centerY + birdSize * 0.08,
+        centerX + birdSize * 0.52, centerY - birdSize * 0.02,
+      )
+      ..cubicTo(
+        centerX + birdSize * 0.28, centerY + birdSize * 0.38,
+        centerX - birdSize * 0.18, centerY + birdSize * 0.34,
+        centerX - birdSize * 0.35, centerY + birdSize * 0.05,
+      )
+      ..close();
+    canvas.drawPath(bellyPath, bellyPaint);
+
+    // 5. Pectoral Fin
+    canvas.save();
+    canvas.translate(centerX - birdSize * 0.05, centerY + birdSize * 0.1);
+    canvas.rotate(_wingAngle * 0.5);
+    final pectoralPath = Path()
+      ..moveTo(0, 0)
+      ..quadraticBezierTo(birdSize * 0.05, birdSize * 0.3, -birdSize * 0.15, birdSize * 0.35)
+      ..quadraticBezierTo(-birdSize * 0.05, birdSize * 0.15, 0, 0)
+      ..close();
+    canvas.drawPath(pectoralPath, finPaint);
+    canvas.restore();
+
+    // 6. Gills
+    final gillPaint = Paint()
+      ..color = const Color(0xFF37474F)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5;
+    for (int i = 0; i < 3; i++) {
+      final gx = centerX + birdSize * 0.02 - (i * 3.5);
+      canvas.drawLine(Offset(gx, centerY - 4), Offset(gx - 1.5, centerY + 6), gillPaint);
+    }
+
+    // 7. Sharp Tooth & Mouth
+    final mouthPaint = Paint()
+      ..color = const Color(0xFF263238)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.8;
+    final mouthPath = Path()
+      ..moveTo(centerX + birdSize * 0.45, centerY + birdSize * 0.08)
+      ..quadraticBezierTo(centerX + birdSize * 0.32, centerY + birdSize * 0.18, centerX + birdSize * 0.2, centerY + birdSize * 0.12);
+    canvas.drawPath(mouthPath, mouthPaint);
+
+    final teethPaint = Paint()..color = Colors.white;
+    for (int i = 0; i < 2; i++) {
+      final tx = centerX + birdSize * 0.38 - (i * 5);
+      final toothPath = Path()
+        ..moveTo(tx, centerY + birdSize * 0.1)
+        ..lineTo(tx + 2.5, centerY + birdSize * 0.17)
+        ..lineTo(tx + 5, centerY + birdSize * 0.1)
+        ..close();
+      canvas.drawPath(toothPath, teethPaint);
+    }
+
+    // 8. Shark Eye
+    final eyeWhite = Paint()..color = WorkshopSettings.birdEyeColor;
+    final eyeCenter = Offset(centerX + birdSize * 0.28, centerY - birdSize * 0.12);
+    canvas.drawCircle(eyeCenter, 4.5, eyeWhite);
+
+    final eyePupil = Paint()..color = WorkshopSettings.birdPupilColor;
+    canvas.drawCircle(Offset(eyeCenter.dx + 1, eyeCenter.dy), 2.2, eyePupil);
+
+    final eyeGlint = Paint()..color = Colors.white;
+    canvas.drawCircle(Offset(eyeCenter.dx + 0.5, eyeCenter.dy - 1.2), 1.2, eyeGlint);
   }
 
   void jump() {

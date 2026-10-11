@@ -18,6 +18,9 @@ class AudioService {
     try {
       _soundEnabled = WorkshopSettings.soundEnabled;
       
+      // Ensure FlameAudio loads directly from Flutter assets matching pubspec.yaml
+      FlameAudio.audioCache.prefix = '';
+
       if (_soundEnabled) {
         // Preload all sound effects
         await FlameAudio.audioCache.loadAll([
@@ -30,7 +33,7 @@ class AudioService {
       
       _initialized = true;
     } catch (e) {
-      // Sound files not found - disable sounds
+      // Sound files or WebAudio format fallback - handle gracefully
       _soundEnabled = false;
     }
   }
